@@ -1,0 +1,22 @@
+{
+    "contents" : "",
+    "created" : 1438858333552.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "B2D9C518",
+    "lastKnownWriteTime" : 0,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "caption" : "sa2_molten",
+        "contentUrl" : "content?title=sa2_molten&file=02d718d5c8774280903769a693956dd7.htm",
+        "displayedObservations" : 1000,
+        "displayedVariables" : 7,
+        "totalObservations" : 103488,
+        "variables" : 7
+    },
+    "source_on_save" : false,
+    "type" : "r_dataframe"
+}

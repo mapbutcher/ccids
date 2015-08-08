@@ -1,0 +1,118 @@
+---
+title: "Week 1 Session 1"
+author: "Simon Hope"
+date: "August 4, 2015"
+output: html_document
+---
+
+
+```{r}
+# Assign a variable like so
+a <- 2
+
+# Repeat a variable---here, NA--10 times an call it b
+# rep is a function (1st arg what to repeat, 2nd arg how many times to repeat)
+b <- rep(NA, 10)
+
+#square brackets for indexing i.e. assign 5 element number 10
+b[5] <- 10
+
+# Can generate a vector of random numbers with mean = 2 and
+# standard deviation = 3
+c<-rnorm(10, 2, 3)
+
+# Can multiply a vector by a scalar
+c*4
+
+# And can use all common mathematical operators
+d <- 4 + (c^3)/2 + log(abs(c))
+d
+
+#exercise 
+vec1<-rnorm(5)
+vec2<-rep(4,5)
+vec1*vec2
+vec1[5]/vec2[3]
+
+# Create a demonstration dataset
+test.data <- data.frame(Series1 = rnorm(100),
+                        Series2 = rnorm(100),
+                        Series3 = sample(LETTERS, 100, replace = TRUE))
+
+# First look at the data structure
+# Note the sample set of letters are a Factor. A factor can be used to save storage for repetative text. 
+str(test.data)
+
+# Plot a univariate series
+plot(test.data$Series1)
+
+# Plot a factor series
+plot(test.data$Series3)
+
+# Plot a data frame
+plot(test.data)
+
+# Summarise the dataframe---useful for initial checking
+summary(test.data)
+
+# The first row and all of rthe columns
+test.data[1,]
+
+# The third column
+test.data[,3]
+
+# The value in the second row and column
+test.data[2,2]
+
+# here we create a vector then use it as an index
+# extract the first column into a vector
+foo<-test.data[c(TRUE, FALSE, FALSE)]
+
+datalist <- list()
+
+# Add a vector of letters
+datalist[[1]] <- c("A", "B", "C")
+# Add a dataframe
+datalist[[2]] <- test.data
+
+# Add a model (more on this later!)
+datalist[[3]] <- lm(rnorm(100) ~ rnorm(100))
+
+#returns the native data type
+datalist[[1]]
+
+#returns a list
+datalist[1]
+
+```
+
+```{r}
+
+#File reading
+install.packages("readr)
+library(readr)
+invoices <- read_csv("invoices.csv")
+inflation <- read_csv("inflation.csv")
+
+library("reshape2")
+#plot a time series
+plot.ts(inflation[,3:5])
+plot(inflation[,3:5])
+
+state_accounts <- read_csv("state_accounts.csv")
+state_account_molten <- melt(state_accounts, id = "Date")
+
+?reshape2::dcast
+state_account_wide <- dcast(state_account_molten, Date ~ variable, value.var = "value")
+
+
+load("complete_data.RData")
+str(SA2)
+#id is the column we want to KEEP as a column
+sa2_molten <- melt(SA2,id="Name",c(6:197))
+
+
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

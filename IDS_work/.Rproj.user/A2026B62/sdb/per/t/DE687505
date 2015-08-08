@@ -1,0 +1,22 @@
+{
+    "contents" : "",
+    "created" : 1438858296434.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "DE687505",
+    "lastKnownWriteTime" : 0,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "caption" : "SA2.m",
+        "contentUrl" : "content?title=SA2.m&file=dc7b1272c1a34ec1b8d79723d10f64c8.htm",
+        "displayedObservations" : 1000,
+        "displayedVariables" : 8,
+        "totalObservations" : 72618,
+        "variables" : 7
+    },
+    "source_on_save" : false,
+    "type" : "r_dataframe"
+}

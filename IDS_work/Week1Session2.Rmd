@@ -1,0 +1,110 @@
+---
+title: "Week1Session2"
+author: "Simon Hope"
+date: "August 6, 2015"
+output: html_document
+---
+
+```{r}
+
+load("complete_data.RData")
+str(SA2)
+#id is the column we want to KEEP as a column
+sa2_molten <- melt(SA2,id=1:5)
+
+state_accounts <- read_csv("state_accounts.csv")
+#multiple id columns can be specified using c("columnA","columnB")
+state_account_molten <- melt(state_accounts, id = "Date")
+
+#namespacing the dcast function to reshape2, just in case anyone else has declared a function called dcast
+?reshape2::dcast
+
+#'variable' is the name of the column which is going to be converted to be exploded
+# Date is variable that we want down the rows
+# 'variable' (which is state i.e. NSW) is across the columns
+# 'value' is the observations
+state_account_wide <- dcast(state_account_molten, Date ~ variable, value.var = "value")
+
+#Columns can be added using $
+state_accounts$foo <- "" #add column
+state_accounts$foo <- NULL #remove column
+
+state_account_wide2 <- dcast(state_account_molten, variable ~ Date, value.var = "value")
+
+install.packages("dplyr")
+
+x <- matrix(rnorm(100), 10, 10)
+mean(colMeans(x))
+
+library(dplyr)
+#using pipes tell whatever is on the left then give it to the function on the right
+#and again to the next function on the right (i.e. chain functions)
+x %>% colMeans %>% mean
+
+#mutate and summarise allows for multiple columns to be added
+
+tax.data <- read.csv("synthetic_tax.csv")
+
+tax.data %>% group_by(Gender) %>%
+  summarise(mean.income = mean(Taxable_Income))
+
+sa_compound <- state_account_molten %>% 
+  group_by(variable) %>%
+    mutate(compound_growth = c(NA, diff(log(value)))) %>% #give the initial value of NA
+      summarise(max_compound_growth = max(compound_growth, na.rm = T)) %>% 
+          arrange(max_compound_growth)
+      
+
+
+filter(!is.na(compound_growth)) # filters the NA's out
+
+
+filter(sa_compound, max(compound_growth, na.rm = T))
+
+tax <- read.csv("synthetic_tax.csv")
+
+tax %>% group_by(Gender) %>%
+  mutate(decile=ntile(Taxable_Income,10)) %>%
+    group_by(Gender,decile)
+
+f <- function(x){
+  browser()
+  s <- sum(x)
+  n <- length(x)
+  s/n #last line gets returned
+}
+
+d <- f(c(1,2,3))
+
+f1 <- function (a,b){
+  #browser()
+  out <- ifelse(a>b, a, NA) #note we can give ifelse a vector and it automatically iterates over the elemements of the vector
+  out
+}
+
+install.packages("stringr")
+library(stringr)
+library(dplyr)
+GDP <- state_account_molten %>%
+  mutate(Year = str_extract(Date,"[0-9]{4}") %>% as.numeric) %>% group_by(Year) %>%
+    summarise(GDP = sum(value)) %>%
+    mutate(GDP_growth = c(NA, diff(log(GDP))))
+
+superreturns <- sa2_molten %>% filter(!is.na(value)) %>%
+  mutate(Year = str_extract(variable, "[0-9]{4}") %>% as.numeric) %>%
+  group_by(Year) %>%
+  summarise(Average_returns = (1+mean(value)/100)^12-1)
+
+output <- left_join(GDP, superreturns)
+
+plot(output$GDP_growth, output$Average_returns)
+
+
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
