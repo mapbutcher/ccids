@@ -1,0 +1,56 @@
+---
+title: "Week1Homework"
+author: "Simon Hope"
+date: "August 9, 2015"
+output: html_document
+---
+
+Homework for week 1 - Task 1
+
+```{r}
+#Load necessary libs:
+library("reshape2")
+library(dplyr)
+library(stringr)
+
+#Load data:
+load("complete_data.RData")
+
+#Melt the data-frame, making sure to keep all the non-value colums as columns. 
+SA2_melt <- melt(SA2, id = c("Name", "Global Broad Category Group","Global Category","Morningstar Category","MPT Benchmark"))
+
+#generate a date column based upon the year in the variable column
+SA2_melt_date <- SA2_melt %>% mutate(Date = paste0(str_extract(variable,"[0-9]{4}-"),'01-01') %>% as.Date) %>% filter(!is.na(value))
+
+#which fund manager had the highest average returns?
+SA2_melt_date %>% group_by(Name) %>% summarise(mean.growth = mean(value)) %>% arrange(desc(mean.growth))
+
+```
+
+Homework for week 1 - Task 2
+
+```{r}
+#load necessary libs
+install.packages("zoo")
+library(zoo)
+library(readr)
+
+#load data
+invoices <- read_csv("invoices.csv")
+
+#strip out the time-zone from the date
+#create a separate new date field 
+invoices_munged <- invoices %>% mutate(date = as.POSIXct(strptime(gsub("[A-Z]{2}","", date), "%a %b %d %H:%M:%S  %Y"))) %>% mutate(justdate = date %>% as.Date)
+
+#Create a new column containing the year and month.
+invoices_munged <- invoices_munged %>% mutate(justyearmon=as.yearmon(justdate))
+
+#Monthly sales total
+invoices_monthly_summary <- invoices_munged %>% group_by(justyearmon) %>% summarise(total_sales = sum(total))
+invoices_daily_summary <- invoices_munged %>% group_by(justdate) %>% summarise(total_sales = sum(total))
+
+#plot it
+plot(invoices_monthly_summary)
+
+```
+
