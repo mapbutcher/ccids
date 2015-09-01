@@ -1,0 +1,32 @@
+---
+title: "Week3Session1"
+author: "Simon Hope"
+date: "August 18, 2015"
+output: html_document
+---
+
+
+```{r}
+
+library(dplyr); library(AER)
+data("CigarettesSW")
+
+CigarettesSW <- CigarettesSW %>%
+  mutate(rprice = price/cpi, # Real price adjusted for inflation
+         rincome = income/population/cpi, # Real per-capital income
+         tdiff = (taxs - tax)/cpi)
+
+#compare price and sales
+lm1 <- lm(log(packs)~log(rprice), data=CigarettesSW)
+summary(lm1)
+
+#add a control var - income
+lm2 <- lm(log(packs)~log(rprice) + rincome, data=CigarettesSW)
+summary(lm2)
+
+#add an extra control  - year
+lm3 <- lm(log(packs)~log(rprice) + rincome + year, data=CigarettesSW)
+summary(lm3)
+
+```
+

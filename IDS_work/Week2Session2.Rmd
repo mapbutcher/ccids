@@ -1,0 +1,82 @@
+---
+title: "WeekSession2"
+author: "Simon Hope"
+date: "August 13, 2015"
+output: html_document
+---
+
+
+```{r}
+
+install.packages(c("rpart", "randomForest", "rpart.plot", "AUC", "AER"))
+
+# Load libraries
+library(AUC); library(AER);
+# Load data
+data(Affairs)
+# Create dependent variable - i.e. new column
+Affairs$morethan0 <- ifelse(Affairs$affairs>0, 1, 0)
+# Estimate logit model - logit compresses unbounded scale onto bounded scale i.e 0 or 1
+# more than 0 is what we're trying to predict
+# right hand side of the ~ is the variables we're going to us in this . = all fields - Affairs
+mod <- glm(morethan0 ~ . - affairs, data = Affairs, family = binomial(link = "logit"))
+
+summary(mod)
+# Create some predictions from the model
+predictions <- predict(mod, type = "response")
+# Plot the predictions and the ROC curve
+hist(predictions)
+
+#roc curve
+plot(roc(predictions = predictions, labels = factor(Affairs$morethan0)), "ROC for Affairs")
+#area under the curve
+auc(roc(predictions = predictions, labels = factor(Affairs$morethan0)))
+
+library(glmnet)
+y <- Affairs$morethan0
+
+#use ~ to separate dependent and independent variable
+x <- model.matrix(~ . - affairs - morethan0, data = Affairs)
+
+#not cross validating
+rglm1 <-glmnet(y=y, x=X,family="binomial")
+plot(rglm1)
+
+#we use binomial to bound the prediction to 0 or 1
+#cross validating glm
+rglm <- cv.glmnet(y=y, x=X, nfolds = 200, family="binomial")
+plot(rglm)
+
+
+rglm_pred <- predict(rglm, s = "lambda.min",newx = x, type="response")
+#number of people with a given probability of being in an affair
+hist(rglm_pred)
+plot(roc(predictions = rglm_pred, labels = factor(Affairs$morethan0)))
+#namespace
+AUC::auc(roc(predictions = rglm_pred, labels = factor(Affairs$morethan0)))
+
+
+library(randomForest)
+# Run the model
+rfmod <- randomForest(as.factor(morethan0) ~ . - affairs, data = Affairs, ntree = 5000)
+# Generate predictions
+pred_rf <- predict(rfmod, type = "prob")
+# GLM roc
+plot(roc(predictions, as.factor(Affairs$morethan0)))
+# RF roc
+plot(roc(pred_rf[,2], as.factor(Affairs$morethan0)), col = "red")
+
+
+library(rpart);library(rpart.plot)
+tree <- rpart(affairs ~ . - morethan0, data = Affairs)#last param trims the tree
+rpart.plot(tree,extra = 1)
+
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

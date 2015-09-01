@@ -1,0 +1,84 @@
+---
+title: "Week2Session1"
+author: "Simon Hope"
+date: "August 11, 2015"
+output: html_document
+---
+
+
+```{r}
+
+install.packages("glmnet")
+
+# Define some parameters
+a <- 5
+b <- 3
+c <- 6
+sigma <- 4
+
+# Create some features
+x1 <- rnorm(100) #normal distribution with 100 observations
+x2 <- sample(c(0,1), 100, replace = T) 
+
+# "Generate" your data
+y <- rnorm(100, # Sample size
+           a + b*x1 + c*x2, # The conditional mean
+           sigma) # The standard deviation (this can be conditional also)
+
+df <- data.frame(y,x1,x2)
+mod <-lm(y ~ x1 + x2, data = df)
+plot(y,predict(mod))
+
+
+plot(df)
+plot.ts(y)
+
+
+number <- 10000
+mean <- 4 
+sd <- 2
+x <- rnorm(number, mean, sd)
+hist(x)
+
+
+mu <- 5 #mean
+sigma <- 2 #standard deviation
+
+#data generating process
+#create a distribution
+#generate 200 random observations with a mean of 5 and standard deviation of 2
+y <- rnorm(200, mu, sigma) 
+
+#create a linear model (lm) passing in our distribution y
+model <- lm(y ~ 1) #y is a set of random numbers, 1 is a constant
+summary(model) # This tells you the parameter estimates
+
+#predicts the mean in the model
+predictions <- predict(model)
+
+plot(predictions)
+
+
+taxdata <- read.csv("synthetic_tax.csv")
+
+#factor allows us to treat each age range as an individual feature e.g. group by age bucket
+#with gender the model takes 0 by default
+#Taxable_Income is the dependent then Gender etc are the features
+taxmod <- lm(Taxable_Income ~ Gender + factor(age_range), data = taxdata)
+summary(taxmod)
+plot(taxdata$Taxable_Income, predict(taxmod))
+
+
+library(glmnet)
+# Note: Make sure no missing values in any of your dependent or independent variables
+Y <- taxdata$Taxable_Income
+X <- model.matrix(~ Gender*factor(age_range)*factor(Occ_code), data = taxdata)
+
+mod1 <- glmnet(x = X, y = Y)
+plot(mod1)
+
+coef(mod1)
+
+```
+
+

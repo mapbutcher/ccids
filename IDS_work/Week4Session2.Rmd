@@ -1,0 +1,95 @@
+---
+title: "Week 4 Session 2"
+author: "Simon Hope"
+date: "August 27, 2015"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+install.packages("ggvis")
+install.packages("ggmap")
+load("super_data.RData")
+library(ggplot2); library(dplyr); library(ggvis)
+library(lme4)
+
+apra.ss <- apra.sr.full %>% filter(!is.na(Average.fees))
+apra.ss %>% ggplot(aes(x=Average.fees, y=Rate_of_return, colour=as.factor(Year)))+geom_point(alpha=0.5)
+
+mod1 <- lm(Rate_of_return ~ Average.fees, data = apra.ss)
+summary(mod1)
+
+mod2 <- lmer(Rate_of_return ~ Average.fees + (1 | Year), data = apra.ss)
+summary(mod2)
+
+#control for asset allocation and find size
+mod3 <- lmer(Rate_of_return ~ Average.fees + Australian_Fixed_Interest + Australian_Equities + Cash + I(Real.FUM/1e6)+ (1 | Year), data = apra.ss)
+summary(mod3)
+
+library (AER)
+mod4 <- ivreg(Rate_of_return ~ -1 + as.factor(Year)+Average.fees + Australian_Fixed_Interest + Australian_Equities + Cash | Cost.ratio + as.factor(Year)+Average.fees + Australian_Fixed_Interest + Australian_Equities + Cash + (1 | Year), data = apra.ss)
+summary(mod4)
+
+apra.sr.full %>% filter(!is.na(Rate_of_return)) %>% 
+  group_by (Year) %>% 
+  summarise(Median = median (Rate_of_return),
+            Lower = quantile(Rate_of_return, 0.25),
+            Upper = quantile(Rate_of_return, 0.75)) %>%
+  ggplot(aes(x = Year)) +
+  geom_ribbon(aes(ymin=Lower,ymax=Upper), fill = "orange", alpha = 0.5) +
+  geom_line(aes(y=Median))
+
+
+apra.sr.full %>% 
+  ggplot(aes(x = as.factor(Year), y = Rate_of_return)) +
+  geom_boxplot()
+
+apra.sr.full %>% 
+  ggplot(aes(x = as.factor(Year), y = Rate_of_return)) +
+  geom_violin()
+
+apra.sr.full %>% 
+  ggplot(aes(x = as.factor(Year), y = Rate_of_return)) +
+  geom_point()
+
+apra.sr.full %>% 
+  ggplot(aes(x = as.factor(Year), y = Rate_of_return)) +
+  geom_jitter(alpha = 0.2)
+
+library(ggmap)
+melb <- get_map("Melbourne", zoom = 12)
+ggmap(melb)
+
+
+code <- geocode(location = c("205 Alma Road St Kilda East"))
+melb <- get_map("Melbourne, Australia", zoom = 12) 
+
+ggmap(melb) + geom_point(aes(x = code$lon, y = code$lat), colour = "red")
+
+code <- geocode(location = c("205 Alma Road St Kilda East", "20 Queen St Melbourne"))
+melb <- get_googlemap("Melbourne, Australia", markers = code, path = code,zoom = 12) 
+ggmap(melb) 
+
+
+library(ggvis)
+apra.sr.full %>% ggvis(x = ~as.factor(Year), y = ~Rate_of_return, fill = ~Fund_type) %>%
+  layer_points()
+
+library(dplyr)
+apra.sr.full %>% ggvis(x = ~as.factor(Year), y = ~Rate_of_return, fill = ~Fund_type, size := input_slider(20, 200), opacity := input_slider(0,1)) %>%
+  layer_points()
+
+apra.sr.full %>% ggvis(x = ~Year, y = ~Rate_of_return) %>%
+  layer_smooths(span = input_slider(min= 0.2, max = 1))
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
